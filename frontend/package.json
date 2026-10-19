@@ -31,5 +31,8 @@
     "@testing-library/jest-dom": "^6.6.3",
     "jsdom": "^26.1.0",
     "@types/node": "^22.15.21"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.64.10"
   }
 }
