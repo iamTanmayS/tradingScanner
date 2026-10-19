@@ -1,21 +1,19 @@
 import { it, expect } from 'vitest';
 
-it('checks Binance headers and rate limits', async () => {
-  const res1 = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=50');
-  console.log('api.binance.com Status:', res1.status);
-  const h1: Record<string, string> = {};
-  for (const [k, v] of res1.headers.entries()) {
-    if (k.includes('weight') || k.includes('rate') || k.includes('retry') || k.includes('mbx')) h1[k] = v;
+it('checks exchangeInfo across endpoints', async () => {
+  const endpoints = [
+    'https://data-api.binance.vision/api/v3/exchangeInfo',
+    'https://api1.binance.com/api/v3/exchangeInfo',
+    'https://api.binance.com/api/v3/exchangeInfo',
+  ];
+  for (const ep of endpoints) {
+    const res = await fetch(ep, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+      },
+    });
+    console.log(ep, 'status:', res.status);
+    expect(res.status).toBe(200);
   }
-  console.log('api.binance.com Headers:', h1);
-
-  const res2 = await fetch('https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=50');
-  console.log('data-api.binance.vision Status:', res2.status);
-  const h2: Record<string, string> = {};
-  for (const [k, v] of res2.headers.entries()) {
-    if (k.includes('weight') || k.includes('rate') || k.includes('retry') || k.includes('mbx')) h2[k] = v;
-  }
-  console.log('data-api.binance.vision Headers:', h2);
-  expect(res1.status).toBe(200);
-  expect(res2.status).toBe(200);
 });

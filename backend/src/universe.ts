@@ -104,20 +104,52 @@ export function rankByVolume(
 // ─── Network functions ────────────────────────────────────────────────────────
 
 /**
+ * Fetch JSON from Binance with host fallback and browser-like User-Agent.
+ * Prevents cloud datacenter IP blocks (HTTP 418 / 451) on Render, AWS, and GCP.
+ */
+async function fetchBinanceJson<T>(apiPath: string): Promise<T> {
+  const hosts = [
+    config.binanceRestUrl,
+    'https://data-api.binance.vision',
+    'https://api1.binance.com',
+    'https://api2.binance.com',
+    'https://api3.binance.com',
+    'https://api.binance.com',
+  ];
+  const uniqueHosts = Array.from(new Set(hosts));
+
+  let lastError: Error | null = null;
+  for (const host of uniqueHosts) {
+    const url = `${host}${apiPath}`;
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(10000),
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+        },
+      });
+      if (res.ok) {
+        return (await res.json()) as T;
+      }
+      lastError = new Error(`${url} failed: HTTP ${res.status}`);
+      console.warn(`[universe] ${url} returned HTTP ${res.status} — trying next host...`);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      console.warn(`[universe] ${url} error: ${lastError.message} — trying next host...`);
+    }
+  }
+  throw lastError ?? new Error(`All Binance hosts failed for ${apiPath}`);
+}
+
+/**
  * Fetch eligible symbols from Binance exchange metadata.
  *
  * @throws {Error} if the HTTP request fails or the response is malformed.
  */
 export async function fetchEligibleSymbols(): Promise<Set<string>> {
-  const url = `${config.binanceRestUrl}/api/v3/exchangeInfo`;
-  console.log(`[universe] Fetching exchange info from ${url}`);
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`exchangeInfo request failed: HTTP ${res.status}`);
-  }
-
-  const data = (await res.json()) as { symbols: ExchangeSymbol[] };
+  console.log(`[universe] Fetching exchange info`);
+  const data = await fetchBinanceJson<{ symbols: ExchangeSymbol[] }>('/api/v3/exchangeInfo');
   if (!Array.isArray(data.symbols)) {
     throw new Error('exchangeInfo response missing "symbols" array');
   }
@@ -138,15 +170,8 @@ export async function fetchTopSymbolsByVolume(
   eligible: Set<string>,
   limit: number,
 ): Promise<string[]> {
-  const url = `${config.binanceRestUrl}/api/v3/ticker/24hr`;
   console.log(`[universe] Fetching 24h tickers to rank by volume`);
-
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`ticker/24hr request failed: HTTP ${res.status}`);
-  }
-
-  const tickers = (await res.json()) as Ticker24h[];
+  const tickers = await fetchBinanceJson<Ticker24h[]>('/api/v3/ticker/24hr');
   if (!Array.isArray(tickers)) {
     throw new Error('ticker/24hr response is not an array');
   }

@@ -27,8 +27,8 @@ export const config = {
     seedConcurrency: getEnvInt('SEED_CONCURRENCY', 2),
     /** Number of 1h candles to fetch per coin (minimum 21 for all indicators) */
     seedCandleCount: Math.max(getEnvInt('SEED_CANDLE_COUNT', 30), 21),
-    /** Binance REST API base URL */
-    binanceRestUrl: getEnvStr('BINANCE_REST_URL', 'https://api.binance.com'),
+    /** Binance REST API base URL (data-api.binance.vision does not block cloud hosting IPs) */
+    binanceRestUrl: getEnvStr('BINANCE_REST_URL', 'https://data-api.binance.vision'),
     /** Binance WebSocket stream URL */
     binanceWsUrl: getEnvStr('BINANCE_WS_URL', 'wss://stream.binance.com:9443/ws/!miniTicker@arr'),
 };

@@ -39,20 +39,29 @@ async function syncSymbol(symbol: string): Promise<void> {
   const entry = getCacheEntry(symbol);
   if (!entry) return;
 
-  const url =
-    `${config.binanceRestUrl}/api/v3/klines` +
-    `?symbol=${symbol}&interval=1h&limit=3`;
+  const endpoints = [
+    `${config.binanceRestUrl}/api/v3/klines?symbol=${symbol}&interval=1h&limit=3`,
+    `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=1h&limit=3`,
+  ];
 
-  let rawKlines: RawKline[];
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.warn(`[hourlySync] ${symbol}: HTTP ${res.status} — skipping`);
-      return;
+  let rawKlines: RawKline[] | null = null;
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      });
+      if (res.ok) {
+        rawKlines = (await res.json()) as RawKline[];
+        break;
+      }
+    } catch {
+      // try next
     }
-    rawKlines = (await res.json()) as RawKline[];
-  } catch (err) {
-    console.warn(`[hourlySync] ${symbol}: fetch error — ${String(err)}`);
+  }
+
+  if (!rawKlines) {
+    console.warn(`[hourlySync] ${symbol}: all klines endpoints failed — skipping`);
     return;
   }
 

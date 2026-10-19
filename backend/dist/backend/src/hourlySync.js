@@ -34,19 +34,28 @@ async function syncSymbol(symbol) {
     const entry = getCacheEntry(symbol);
     if (!entry)
         return;
-    const url = `${config.binanceRestUrl}/api/v3/klines` +
-        `?symbol=${symbol}&interval=1h&limit=3`;
-    let rawKlines;
-    try {
-        const res = await fetch(url);
-        if (!res.ok) {
-            console.warn(`[hourlySync] ${symbol}: HTTP ${res.status} — skipping`);
-            return;
+    const endpoints = [
+        `${config.binanceRestUrl}/api/v3/klines?symbol=${symbol}&interval=1h&limit=3`,
+        `https://data-api.binance.vision/api/v3/klines?symbol=${symbol}&interval=1h&limit=3`,
+    ];
+    let rawKlines = null;
+    for (const url of endpoints) {
+        try {
+            const res = await fetch(url, {
+                signal: AbortSignal.timeout(8000),
+                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+            });
+            if (res.ok) {
+                rawKlines = (await res.json());
+                break;
+            }
         }
-        rawKlines = (await res.json());
+        catch {
+            // try next
+        }
     }
-    catch (err) {
-        console.warn(`[hourlySync] ${symbol}: fetch error — ${String(err)}`);
+    if (!rawKlines) {
+        console.warn(`[hourlySync] ${symbol}: all klines endpoints failed — skipping`);
         return;
     }
     const now = Date.now();

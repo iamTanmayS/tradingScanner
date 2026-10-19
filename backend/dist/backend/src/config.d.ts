@@ -17,7 +17,7 @@ export declare const config: {
     readonly seedConcurrency: number;
     /** Number of 1h candles to fetch per coin (minimum 21 for all indicators) */
     readonly seedCandleCount: number;
-    /** Binance REST API base URL */
+    /** Binance REST API base URL (data-api.binance.vision does not block cloud hosting IPs) */
     readonly binanceRestUrl: string;
     /** Binance WebSocket stream URL */
     readonly binanceWsUrl: string;
