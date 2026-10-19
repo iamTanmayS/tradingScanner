@@ -1,0 +1,99 @@
+/**
+ * Global reset and base styles.
+ *
+ * Uses design tokens from tokens.css.
+ * No component-specific styles here — keep this file minimal.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-0);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  min-height: 100dvh;
+}
+
+/* Tabular figures for all numeric content */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Utility: muted secondary text */
+.text-2 { color: var(--text-2); }
+.text-3 { color: var(--text-3); }
+
+/* Gain / loss semantic colors */
+.gain { color: var(--gain); }
+.loss { color: var(--loss); }
+.signal-text { color: var(--signal); }
+
+/* Unavailable indicator placeholder */
+.unavailable {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Horizontal divider */
+.divider {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 0;
+}
+
+/* Price flash animation (triggered via JS class toggle) */
+@keyframes flash-gain {
+  0% { background-color: rgba(52, 211, 160, 0.2); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flash-loss {
+  0% { background-color: rgba(244, 104, 122, 0.2); }
+  100% { background-color: transparent; }
+}
+
+.price-flash-gain {
+  animation: flash-gain var(--duration-mid) ease-out;
+}
+
+.price-flash-loss {
+  animation: flash-loss var(--duration-mid) ease-out;
+}
+
+/* Scrollbar styling — thin, dark track */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-1); }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

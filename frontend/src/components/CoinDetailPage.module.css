@@ -1,0 +1,414 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--bg-0);
+  color: var(--text-1);
+  overflow: hidden;
+}
+
+/* ── Top Navigation Bar ───────────────────────────────────────────────────── */
+.navBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 20px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-1);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.backBtn:hover {
+  background: var(--line);
+  border-color: var(--line-strong);
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-3);
+  background: var(--bg-0);
+  padding: 1px 4px;
+  border-radius: 2px;
+  border: 1px solid var(--line);
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.breadcrumbSlash {
+  color: var(--line-strong);
+}
+
+.breadcrumbActive {
+  color: var(--text-1);
+  font-weight: 500;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.starBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.starBtn:hover {
+  color: var(--signal);
+  border-color: rgba(242, 184, 75, 0.4);
+}
+
+.starred {
+  color: var(--signal) !important;
+  border-color: rgba(242, 184, 75, 0.4) !important;
+  background: rgba(242, 184, 75, 0.08) !important;
+}
+
+.binanceLink {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-3);
+  font-size: 12px;
+  text-decoration: none;
+  transition: all var(--duration-fast);
+}
+
+.binanceLink:hover {
+  color: var(--text-1);
+  border-color: var(--line-strong);
+}
+
+/* ── Scroll Area ──────────────────────────────────────────────────────────── */
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Hero Section ─────────────────────────────────────────────────────────── */
+.heroSection {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heroMain {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.symbolTag {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.baseSymbol {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.quoteSymbol {
+  font-size: 15px;
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.spotBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.priceGroup {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.mainPrice {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.changeBadge {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Metrics Bar ──────────────────────────────────────────────────────────── */
+.metricsBar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.metricItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 14px;
+  background: var(--bg-2);
+}
+
+.metricLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+}
+
+.metricValue {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.unavailable {
+  color: var(--text-3);
+}
+
+/* ── Analytical Workspace (2-Column) ──────────────────────────────────────── */
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1200px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Main Column ──────────────────────────────────────────────────────────── */
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.chartCard {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.cardHeaderTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+}
+
+.chartWrapper {
+  padding: 16px;
+}
+
+.chartLoading {
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  font-size: 13px;
+  background: var(--bg-2);
+  border-radius: var(--radius-sm);
+}
+
+/* ── 24h Range Card ───────────────────────────────────────────────────────── */
+.rangeCard {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rangeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.rangeTitle {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+}
+
+.rangePctText {
+  color: var(--text-2);
+  font-family: var(--font-mono);
+}
+
+.rangePctText strong {
+  color: var(--signal);
+}
+
+.rangeTrack {
+  position: relative;
+  height: 6px;
+  background: var(--bg-2);
+  border-radius: 3px;
+  overflow: visible;
+}
+
+.rangeBar {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(244, 104, 122, 0.4), rgba(52, 211, 160, 0.6));
+  border-radius: 3px;
+}
+
+.rangeThumb {
+  position: absolute;
+  top: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text-1);
+  border: 2px solid var(--bg-0);
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.rangeFooter {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ── Side Column ──────────────────────────────────────────────────────────── */
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.strategyContainer {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.waitingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  gap: 10px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.waitingIcon {
+  color: var(--text-3);
+}
+

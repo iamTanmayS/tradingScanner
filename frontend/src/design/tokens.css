@@ -1,0 +1,55 @@
+/* ─── Design Tokens ──────────────────────────────────────────────────────────
+ *
+ * Single source of truth for all color, typography, and spacing values.
+ * Every component must reference these variables — no hard-coded hex values.
+ *
+ * Naming:
+ *   --bg-N     Background layers (0 = deepest, 2 = surface)
+ *   --line     Separator / border colors
+ *   --text-N   Text hierarchy (1 = primary, 3 = muted)
+ *   --gain     Price up / positive delta (green)
+ *   --loss     Price down / negative delta (red)
+ *   --signal   Scanner match highlight (amber)
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Backgrounds */
+  --bg-0: #0a0c0d;
+  --bg-1: #0f1214;
+  --bg-2: #14191c;
+
+  /* Borders / Lines */
+  --line: #252d31;
+  --line-strong: #354047;
+
+  /* Text */
+  --text-1: #e7ecee;
+  --text-2: #9aa6ab;
+  --text-3: #73818a;
+
+  /* Semantic colors */
+  --gain: #34d3a0;
+  --loss: #f4687a;
+  --signal: #f2b84b;
+
+  /* Fonts */
+  --font-sans: "Instrument Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Border radius */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+
+  /* Transitions */
+  --duration-fast: 120ms;
+  --duration-mid: 200ms;
+}
+

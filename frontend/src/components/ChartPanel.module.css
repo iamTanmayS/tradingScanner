@@ -1,0 +1,124 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.controls {
+  display: flex;
+  gap: 4px;
+}
+
+.ivlBtn {
+  padding: 4px 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-3);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.ivlBtn:hover {
+  color: var(--text-2);
+  border-color: var(--line-strong);
+}
+
+.ivlActive {
+  background: var(--bg-0);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.statusGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sourceBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  color: var(--text-2);
+}
+
+.pulseDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+
+.pulseDot.direct {
+  background: #34d3a0;
+  box-shadow: 0 0 6px rgba(52, 211, 160, 0.4);
+}
+
+.pulseDot.proxy {
+  background: #f2b84b;
+  box-shadow: 0 0 6px rgba(242, 184, 75, 0.4);
+}
+
+.pulseDot.error {
+  background: #f4687a;
+}
+
+.container {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.chart {
+  width: 100%;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 18, 20, 0.88);
+  font-size: 13px;
+  color: var(--text-2);
+  z-index: 10;
+}
+
+.retryBtn {
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-1);
+  border: 1px solid var(--line-strong);
+  color: var(--text-1);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.retryBtn:hover {
+  background: var(--bg-0);
+  border-color: var(--accent);
+}

@@ -1,0 +1,282 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 4px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-1);
+  letter-spacing: -0.01em;
+}
+
+.symbolBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-2);
+  background: var(--bg-2);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.overallBadge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.badgeMatched {
+  background: rgba(52, 211, 160, 0.15);
+  color: var(--gain);
+  border: 1px solid rgba(52, 211, 160, 0.3);
+}
+
+.badgeNeutral {
+  background: var(--bg-2);
+  color: var(--text-3);
+  border: 1px solid var(--line);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color var(--duration-fast);
+}
+
+.card--matched {
+  border-color: rgba(52, 211, 160, 0.4);
+  background: rgba(52, 211, 160, 0.03);
+}
+
+.card--partial {
+  border-color: rgba(242, 184, 75, 0.35);
+  background: rgba(242, 184, 75, 0.02);
+}
+
+.card--paused {
+  opacity: 0.6;
+}
+
+.cardHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 8px;
+}
+
+.cardHeader:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cardMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.statusPill {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+.statusMatched {
+  background: rgba(52, 211, 160, 0.15);
+  color: var(--gain);
+}
+
+.statusPartial {
+  background: rgba(242, 184, 75, 0.15);
+  color: var(--signal);
+}
+
+.statusWaiting {
+  background: rgba(154, 166, 171, 0.12);
+  color: var(--text-2);
+}
+
+.statusNotMet {
+  background: rgba(244, 104, 122, 0.12);
+  color: var(--loss);
+}
+
+.statusPaused {
+  background: var(--line);
+  color: var(--text-3);
+}
+
+.strategyName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summaryText {
+  font-size: 11px;
+  color: var(--text-2);
+}
+
+.logicTag {
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--text-3);
+  background: var(--bg-0);
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+
+.expandIcon {
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Conditions list ──────────────────────────────────────────────────────── */
+.conditionsList {
+  border-top: 1px solid var(--line);
+  padding: 10px 12px;
+  background: var(--bg-1);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.conditionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.conditionRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.conditionIcon {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.iconPass { color: var(--gain); }
+.iconFail { color: var(--loss); }
+.iconWait { color: var(--text-3); }
+
+.conditionText {
+  flex: 1;
+  min-width: 0;
+}
+
+.explanation {
+  font-size: 12px;
+  color: var(--text-1);
+  line-height: 1.4;
+}
+
+.valuesBox {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.valTarget {
+  color: var(--text-3);
+}
+.valTarget strong {
+  color: var(--signal);
+}
+
+.valCurrent {
+  color: var(--text-2);
+}
+.valCurrent strong {
+  color: var(--text-1);
+}
+
+.valWaiting strong {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+.gaugeContainer {
+  margin-left: 22px;
+}
+
+/* ── Empty ────────────────────────────────────────────────────────────────── */
+.empty {
+  padding: 16px;
+  background: var(--bg-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+.emptyDesc {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 4px;
+}
+

@@ -1,0 +1,105 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-3);
+  padding: 0 2px;
+}
+
+.zoneLabel {
+  font-weight: 500;
+}
+
+.zoneMarker {
+  color: var(--text-3);
+}
+
+.track {
+  position: relative;
+  height: 8px;
+  background: var(--bg-2);
+  border-radius: 4px;
+  overflow: visible;
+  margin: 3px 0;
+}
+
+.oversoldZone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(52, 211, 160, 0.15);
+  border-radius: 4px 0 0 4px;
+}
+
+.neutralZone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(154, 166, 171, 0.08);
+}
+
+.overboughtZone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(244, 104, 122, 0.15);
+  border-radius: 0 4px 4px 0;
+}
+
+.targetMarker {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--signal);
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.currentPointer {
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 14px;
+  background: var(--text-1);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  z-index: 3;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-2);
+  padding: 0 2px;
+}
+
+.currentText strong {
+  color: var(--text-1);
+}
+
+.targetText {
+  color: var(--signal);
+}
+
+.noData {
+  font-size: 11px;
+  color: var(--text-3);
+  font-style: italic;
+  padding: 4px 0;
+}
+

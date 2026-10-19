@@ -1,0 +1,25 @@
+{
+  "name": "@crypto-scanner/backend",
+  "version": "1.0.0",
+  "description": "Real-time crypto scanner backend — market ingestion, indicator seeding, and WebSocket broadcast",
+  "type": "module",
+  "main": "./dist/backend/src/index.js",
+  "scripts": {
+    "dev": "node --import tsx/esm src/index.ts",
+    "build": "tsc --project tsconfig.json",
+    "start": "node dist/backend/src/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

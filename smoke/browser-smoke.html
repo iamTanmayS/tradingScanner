@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Phase 1 — Browser CORS Smoke Test</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0d1117;
+      color: #c9d1d9;
+      padding: 24px;
+      font-size: 13px;
+    }
+    h1  { color: #58a6ff; margin-bottom: 4px; font-size: 18px; }
+    p.sub { color: #8b949e; margin-bottom: 24px; font-size: 12px; }
+    .section { margin-bottom: 28px; }
+    .section h2 { color: #f0883e; margin-bottom: 10px; font-size: 14px; border-bottom: 1px solid #30363d; padding-bottom: 4px; }
+    .log-line { padding: 2px 0; line-height: 1.6; }
+    .pass   { color: #3fb950; }
+    .fail   { color: #f85149; }
+    .info   { color: #8b949e; }
+    .field  { color: #d2a8ff; }
+    .value  { color: #79c0ff; }
+    .warn   { color: #e3b341; }
+    button {
+      background: #238636; color: #fff; border: none;
+      padding: 8px 20px; border-radius: 6px; cursor: pointer;
+      font-size: 13px; margin-right: 10px; margin-bottom: 16px;
+    }
+    button:hover { background: #2ea043; }
+    button:disabled { background: #21262d; color: #8b949e; cursor: not-allowed; }
+    #output { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+<h1>🔬 Phase 1 — Browser CORS Smoke Test</h1>
+<p class="sub">Tests direct browser → Binance REST and WebSocket connectivity (CORS behaviour for the chart modal)</p>
+
+<button id="runBtn" onclick="runAll()">▶ Run Smoke Tests</button>
+
+<div id="output"></div>
+
+<script>
+const out = document.getElementById('output');
+
+function log(msg, cls = 'info') {
+  const el = document.createElement('div');
+  el.className = `log-line ${cls}`;
+  el.textContent = msg;
+  out.appendChild(el);
+  // auto-scroll
+  el.scrollIntoView({ block: 'end' });
+}
+function pass(msg)  { log('  ✅  ' + msg, 'pass'); }
+function fail(msg)  { log('  ❌  ' + msg, 'fail'); }
+function info(msg)  { log('  ℹ️   ' + msg, 'info'); }
+function warn(msg)  { log('  ⚠️   ' + msg, 'warn'); }
+function sep(title) {
+  log('');
+  const el = document.createElement('div');
+  el.className = 'section';
+  el.innerHTML = `<h2>${title}</h2>`;
+  out.appendChild(el);
+}
+
+// ─── REST Tests ──────────────────────────────────────────────────────────────
+
+async function testREST(host) {
+  const url = `${host}/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=3`;
+  try {
+    const t0 = Date.now();
+    const res = await fetch(url);
+    const ms = Date.now() - t0;
+    if (!res.ok) {
+      fail(`${host}  →  HTTP ${res.status} ${res.statusText}`);
+      return false;
+    }
+    const data = await res.json();
+    pass(`${host}  →  ${res.status} OK  (${ms} ms, ${data.length} candles)`);
+
+    // Print sample candle fields so you understand the REST kline structure
+    const [openTime, open, high, low, close, baseVol, closeTime, quoteVol, trades] = data[0];
+    info(`  Sample candle (index [0]):`);
+    info(`    [0] openTime  = ${openTime}  (${new Date(openTime).toISOString()})`);
+    info(`    [4] close     = ${close}`);
+    info(`    [6] closeTime = ${closeTime}  (${new Date(closeTime).toISOString()})`);
+    info(`    [7] quoteVol  = ${quoteVol}  ← v24 (USDT turnover)`);
+    info(`    [8] trades    = ${trades}`);
+
+    // Is candle closed? closeTime should be in the past
+    if (closeTime < Date.now()) {
+      pass(`  Candle is CLOSED (closeTime < now) — safe to commit to RSI state`);
+    } else {
+      warn(`  Candle is OPEN (closeTime > now) — this is the live candle, do NOT commit`);
+    }
+    return true;
+  } catch (err) {
+    if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+      fail(`${host}  →  CORS BLOCKED or network error`);
+      warn(`  The browser was blocked from fetching ${host}.`);
+      warn(`  This means the chart modal must use the backend /api/klines proxy.`);
+    } else {
+      fail(`${host}  →  ${err.message}`);
+    }
+    return false;
+  }
+}
+
+// ─── WebSocket Test ──────────────────────────────────────────────────────────
+
+function testWebSocket() {
+  return new Promise((resolve) => {
+    sep('TEST B — WebSocket stream.binance.com:9443/ws/!miniTicker@arr');
+    info('Connecting… capturing 3 messages to inspect partial-update behaviour');
+    info('');
+
+    const url = 'wss://stream.binance.com:9443/ws/!miniTicker@arr';
+    let ws;
+    try {
+      ws = new WebSocket(url);
+    } catch (e) {
+      fail('Could not construct WebSocket: ' + e.message);
+      resolve(); return;
+    }
+
+    let msgCount = 0;
+    const batchSizes = [];
+
+    const timeout = setTimeout(() => {
+      fail('No WS message in 15 seconds — possible geo-block or network issue');
+      ws.close();
+    }, 15_000);
+
+    ws.onopen = () => {
+      pass(`Connected to ${url}`);
+    };
+
+    ws.onmessage = (event) => {
+      msgCount++;
+      if (msgCount > 3) return;
+
+      const data = JSON.parse(event.data);
+      const usdtCoins = data.filter(c => c.s.endsWith('USDT'));
+      batchSizes.push(usdtCoins.length);
+
+      log('');
+      info(`📦 Message #${msgCount}:`);
+      info(`  Total symbols in batch  : ${data.length}`);
+      info(`  USDT pairs in batch     : ${usdtCoins.length}`);
+
+      // On first message, annotate every raw field
+      if (msgCount === 1 && usdtCoins.length > 0) {
+        const s = usdtCoins[0];
+        info('');
+        info(`  Raw fields on first USDT coin → ${s.s}:`);
+        info(`    s  (symbol)          : ${s.s}`);
+        info(`    e  (event type)      : ${s.e}`);
+        info(`    E  (event time ms)   : ${s.E}  → ${new Date(s.E).toISOString()}`);
+        const lagMs = Date.now() - s.E;
+        info(`    ↳  network lag       : ~${lagMs} ms from exchange to browser`);
+        info(`    o  (open 24h)        : ${s.o}`);
+        info(`    c  (close / last)    : ${s.c}`);
+        info(`    h  (high 24h)        : ${s.h}`);
+        info(`    l  (low 24h)         : ${s.l}`);
+        info(`    v  (base vol)        : ${s.v}`);
+        info(`    q  (quote vol USDT)  : ${s.q}  ← this is v24 in MarketCoinDTO`);
+        const chg = (((+s.c - +s.o) / +s.o) * 100).toFixed(4);
+        info(`    change24h (derived)  : ${chg}%   ← (close - open) / open * 100`);
+      }
+
+      if (msgCount === 3) {
+        clearTimeout(timeout);
+        ws.close();
+      }
+    };
+
+    ws.onclose = () => {
+      log('');
+      sep('PARTIAL-UPDATE ANALYSIS');
+      if (batchSizes.length === 3) {
+        const [b1, b2, b3] = batchSizes;
+        info(`Batch sizes across 3 messages: [${b1}, ${b2}, ${b3}]`);
+        if (b1 !== b2 || b2 !== b3) {
+          pass('Sizes DIFFER → !miniTicker@arr is a PARTIAL update stream.');
+          pass('Only symbols with changed data appear in each 1-second batch.');
+          pass('Confirmed: backend cache must MERGE each batch into the Map, never replace it.');
+        } else {
+          warn(`Sizes are equal (${b1} each). Could be coincidence — architecture decision stands.`);
+          pass('Merge strategy is correct regardless.');
+        }
+      }
+      log('');
+      pass('WebSocket smoke test complete.');
+      resolve();
+    };
+
+    ws.onerror = (e) => {
+      clearTimeout(timeout);
+      fail('WebSocket error — possible geo-block or browser policy rejection');
+      resolve();
+    };
+  });
+}
+
+// ─── Run All ─────────────────────────────────────────────────────────────────
+
+async function runAll() {
+  document.getElementById('runBtn').disabled = true;
+  out.innerHTML = '';
+
+  log('🔬  CRYPTO SCANNER — PHASE 1 BROWSER CORS SMOKE TEST', 'pass');
+  log('    ' + new Date().toISOString(), 'info');
+
+  sep('TEST A — REST /api/v3/klines  (Direct browser → Binance)');
+  info('Testing two Binance hosts — the chart modal will use whichever succeeds.');
+  info('If both fail here, the chart modal MUST use our backend /api/klines proxy.');
+  log('');
+
+  const r1 = await testREST('https://data-api.binance.vision');
+  log('');
+  const r2 = await testREST('https://api.binance.com');
+
+  log('');
+  if (r1 || r2) {
+    pass('At least one REST host is reachable from the browser — direct chart fetching will work.');
+  } else {
+    warn('Both REST hosts blocked — backend /api/klines proxy fallback is REQUIRED.');
+  }
+
+  await testWebSocket();
+
+  sep('SUMMARY');
+  pass('Phase 1 browser smoke test complete.');
+  info('Open DevTools → Network tab to see the raw HTTP requests and response headers.');
+  info('Look for "Access-Control-Allow-Origin: *" in the Binance response headers.');
+
+  document.getElementById('runBtn').disabled = false;
+}
+</script>
+</body>
+</html>
+

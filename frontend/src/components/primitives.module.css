@@ -1,0 +1,126 @@
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot--connecting    { background: var(--text-3); }
+.dot--connected     { background: var(--gain); }
+.dot--reconnecting  { background: var(--signal); animation: pulse 1s ease-in-out infinite; }
+.dot--disconnected  { background: var(--loss); }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Chip ──────────────────────────────────────────────────────────────────── */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+.chip--neutral { background: var(--bg-2); color: var(--text-2); }
+.chip--gain    { background: rgba(52, 211, 160, 0.12); color: var(--gain); }
+.chip--loss    { background: rgba(244, 104, 122, 0.12); color: var(--loss); }
+.chip--signal  { background: rgba(242, 184, 75, 0.15); color: var(--signal); }
+
+/* ── Panel ──────────────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.panelTitle {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.panelBody {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SegmentedControl ──────────────────────────────────────────────────────── */
+.segmented {
+  display: flex;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 1px;
+}
+
+.segmentedBtn {
+  flex: 1;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--text-3);
+  background: transparent;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.segmentedBtn:hover { color: var(--text-2); }
+.segmentedBtn--active {
+  background: var(--bg-0);
+  color: var(--text-1);
+}
+
+/* ── Spinner ──────────────────────────────────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--text-2);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── EmptyState ─────────────────────────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  gap: 6px;
+  text-align: center;
+}
+.emptyMessage {
+  font-size: 13px;
+  color: var(--text-2);
+}
+.emptyHint {
+  font-size: 12px;
+  color: var(--text-3);
+}
+

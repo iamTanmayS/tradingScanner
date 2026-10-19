@@ -1,0 +1,107 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  min-height: 44px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+
+.ruleChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+}
+
+/* ── Toggle ──────────────────────────────────────────────────────────────── */
+.toggleBtn {
+  width: 20px;
+  height: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  flex-shrink: 0;
+  transition: background var(--duration-fast);
+}
+.on  { background: var(--gain); justify-content: flex-end; }
+.off { background: var(--line-strong); justify-content: flex-start; }
+
+.toggleDot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* ── Rule name ───────────────────────────────────────────────────────────── */
+.ruleName {
+  font-size: 12px;
+  color: var(--text-1);
+  cursor: pointer;
+  user-select: none;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ruleName:hover { color: var(--signal); }
+.ruleNameOff { color: var(--text-3); }
+
+.editBtn {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-3);
+  padding: 0;
+  transition: color var(--duration-fast);
+}
+.editBtn:hover { color: var(--text-2); }
+
+/* ── New rule button ──────────────────────────────────────────────────────── */
+.newBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all var(--duration-fast);
+}
+.newBtn:hover { color: var(--text-1); border-color: var(--text-2); }
+

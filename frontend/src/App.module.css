@@ -1,0 +1,84 @@
+.layout {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  grid-template-columns: 1fr;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--bg-0);
+}
+
+.topBar, .rulesBar {
+  grid-column: 1 / -1;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* When drawer is open, shift left pane slightly to not overlap critical content */
+.withDrawer .main {
+  grid-template-columns: 1fr 240px;
+}
+
+/* ── Left column ──────────────────────────────────────────────────────────── */
+.left {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 12px;
+  padding: 12px;
+  padding-right: 6px;
+}
+
+/* ── Watchlists ───────────────────────────────────────────────────────────── */
+.watchlists {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Market table ─────────────────────────────────────────────────────────── */
+.tableWrapper {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* ── Right column (signals) ──────────────────────────────────────────────── */
+.right {
+  border-left: 1px solid var(--line);
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* ── Responsive: tablet (< 1280px) ──────────────────────────────────────── */
+@media (max-width: 1279px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
+  .right {
+    display: none; /* signals rail collapses — accessible via mobile toggle */
+  }
+
+  .watchlists {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Responsive: mobile (< 768px) ───────────────────────────────────────── */
+@media (max-width: 767px) {
+  .watchlists {
+    grid-template-columns: 1fr 1fr;
+    overflow-x: auto;
+  }
+
+  .left {
+    padding: 8px;
+  }
+}
+
