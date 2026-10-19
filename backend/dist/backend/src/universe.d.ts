@@ -60,15 +60,14 @@ export declare function filterEligibleSymbols(symbols: ExchangeSymbol[]): Set<st
 export declare function rankByVolume(tickers: Ticker24h[], eligible: Set<string>, limit: number): string[];
 /**
  * Fetch eligible symbols from Binance exchange metadata.
- *
- * @throws {Error} if the HTTP request fails or the response is malformed.
+ * Falls back to the pre-bundled universe if Binance REST blocks cloud IPs with HTTP 418.
  */
 export declare function fetchEligibleSymbols(): Promise<Set<string>>;
 /**
  * Fetch 24h ticker stats and return the top N eligible symbols by quote volume.
+ * Falls back to pre-bundled volume ranking if Binance REST blocks cloud IPs.
  *
  * @param eligible - Set of eligible symbols from fetchEligibleSymbols()
  * @param limit    - Maximum number of symbols to select (0 = all eligible)
- * @throws {Error} if the HTTP request fails.
  */
 export declare function fetchTopSymbolsByVolume(eligible: Set<string>, limit: number): Promise<string[]>;

@@ -110,45 +110,61 @@ async function fetchBinanceJson(apiPath) {
     }
     throw lastError ?? new Error(`All Binance hosts failed for ${apiPath}`);
 }
+import { FALLBACK_SYMBOLS } from './fallbackUniverse.js';
 /**
  * Fetch eligible symbols from Binance exchange metadata.
- *
- * @throws {Error} if the HTTP request fails or the response is malformed.
+ * Falls back to the pre-bundled universe if Binance REST blocks cloud IPs with HTTP 418.
  */
 export async function fetchEligibleSymbols() {
     console.log(`[universe] Fetching exchange info`);
-    const data = await fetchBinanceJson('/api/v3/exchangeInfo');
-    if (!Array.isArray(data.symbols)) {
-        throw new Error('exchangeInfo response missing "symbols" array');
+    try {
+        const data = await fetchBinanceJson('/api/v3/exchangeInfo');
+        if (Array.isArray(data.symbols)) {
+            const eligible = filterEligibleSymbols(data.symbols);
+            console.log(`[universe] ${eligible.size} eligible USDT pairs after filtering`);
+            return eligible;
+        }
     }
-    const eligible = filterEligibleSymbols(data.symbols);
-    console.log(`[universe] ${eligible.size} eligible USDT pairs after filtering`);
-    return eligible;
+    catch (err) {
+        console.warn(`[universe] exchangeInfo request failed: ${String(err)} — using pre-bundled universe fallback.`);
+    }
+    const fallbackSet = new Set(FALLBACK_SYMBOLS);
+    console.log(`[universe] Loaded ${fallbackSet.size} pre-bundled eligible USDT pairs`);
+    return fallbackSet;
 }
 /**
  * Fetch 24h ticker stats and return the top N eligible symbols by quote volume.
+ * Falls back to pre-bundled volume ranking if Binance REST blocks cloud IPs.
  *
  * @param eligible - Set of eligible symbols from fetchEligibleSymbols()
  * @param limit    - Maximum number of symbols to select (0 = all eligible)
- * @throws {Error} if the HTTP request fails.
  */
 export async function fetchTopSymbolsByVolume(eligible, limit) {
     console.log(`[universe] Fetching 24h tickers to rank by volume`);
-    const tickers = await fetchBinanceJson('/api/v3/ticker/24hr');
-    if (!Array.isArray(tickers)) {
-        throw new Error('ticker/24hr response is not an array');
-    }
-    const top = rankByVolume(tickers, eligible, limit);
-    // If seeding all (limit <= 0), append any eligible symbols that didn't have 24h ticker records
-    if (limit <= 0) {
-        const seen = new Set(top);
-        for (const sym of eligible) {
-            if (!seen.has(sym)) {
-                top.push(sym);
-                seen.add(sym);
+    try {
+        const tickers = await fetchBinanceJson('/api/v3/ticker/24hr');
+        if (Array.isArray(tickers)) {
+            const top = rankByVolume(tickers, eligible, limit);
+            // If seeding all (limit <= 0), append any eligible symbols that didn't have 24h ticker records
+            if (limit <= 0) {
+                const seen = new Set(top);
+                for (const sym of eligible) {
+                    if (!seen.has(sym)) {
+                        top.push(sym);
+                        seen.add(sym);
+                    }
+                }
             }
+            console.log(`[universe] Selected ${top.length} coins for indicator seeding (top by volume)`);
+            return top;
         }
     }
-    console.log(`[universe] Selected ${top.length} coins for indicator seeding (top by volume)`);
+    catch (err) {
+        console.warn(`[universe] ticker/24hr request failed: ${String(err)} — using pre-bundled volume ranking.`);
+    }
+    // Pre-bundled fallback ranking
+    const filteredFallback = FALLBACK_SYMBOLS.filter((s) => eligible.has(s));
+    const top = limit > 0 ? filteredFallback.slice(0, limit) : filteredFallback;
+    console.log(`[universe] Selected ${top.length} coins from pre-bundled volume ranking`);
     return top;
 }

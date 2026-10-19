@@ -45,13 +45,19 @@ export function stopBinanceStream() {
         activeSocket = null;
     }
 }
+const WS_ENDPOINTS = Array.from(new Set([
+    config.binanceWsUrl,
+    'wss://data-stream.binance.vision/ws/!miniTicker@arr',
+    'wss://stream.binance.com:9443/ws/!miniTicker@arr',
+]));
+let endpointIndex = 0;
 function connect() {
-    const url = config.binanceWsUrl;
+    const url = WS_ENDPOINTS[endpointIndex % WS_ENDPOINTS.length];
     console.log(`[binanceWs] Connecting to ${url}`);
     const ws = new WebSocket(url);
     activeSocket = ws;
     ws.on('open', () => {
-        console.log('[binanceWs] Connected — receiving !miniTicker@arr stream');
+        console.log(`[binanceWs] Connected to ${url} — receiving !miniTicker@arr stream`);
     });
     ws.on('message', (data) => {
         let parsed;
@@ -71,12 +77,13 @@ function connect() {
         onBatchCb?.(updated);
     });
     ws.on('error', (err) => {
-        console.error(`[binanceWs] Stream error: ${err.message}`);
+        console.error(`[binanceWs] Stream error on ${url}: ${err.message}`);
     });
     ws.on('close', (code, reason) => {
         activeSocket = null;
         if (stopped)
             return;
+        endpointIndex++; // Try next mirror if this one dropped
         const reasonStr = reason.toString() || 'no reason given';
         console.warn(`[binanceWs] Disconnected (code=${code}, reason="${reasonStr}") — ` +
             `reconnecting in ${RECONNECT_DELAY_MS / 1000}s`);
