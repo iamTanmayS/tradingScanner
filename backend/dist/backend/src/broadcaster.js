@@ -73,8 +73,56 @@ function broadcastTick() {
     }
 }
 import http from 'node:http';
+import fs from 'node:fs';
+import path from 'node:path';
 import { handleKlinesProxy } from './klinesProxy.js';
 let httpServer = null;
+const MIME_TYPES = {
+    '.html': 'text/html; charset=utf-8',
+    '.js': 'application/javascript; charset=utf-8',
+    '.css': 'text/css; charset=utf-8',
+    '.json': 'application/json; charset=utf-8',
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.svg': 'image/svg+xml',
+    '.ico': 'image/x-icon',
+    '.woff2': 'font/woff2',
+};
+function serveStatic(pathname, res) {
+    if (pathname.startsWith('/api/'))
+        return false;
+    const rawCandidates = [];
+    if (process.env.STATIC_DIR) {
+        rawCandidates.push(process.env.STATIC_DIR);
+    }
+    rawCandidates.push(path.resolve(process.cwd(), '../frontend/dist'), path.resolve(process.cwd(), 'frontend/dist'), path.resolve(process.cwd(), 'dist/frontend'));
+    const candidates = rawCandidates.filter((p) => fs.existsSync(p));
+    const staticDir = candidates[0];
+    if (!staticDir)
+        return false;
+    let relativePath = pathname === '/' ? 'index.html' : pathname.replace(/^\//, '');
+    let filePath = path.join(staticDir, relativePath);
+    // Path traversal guard
+    if (!filePath.startsWith(staticDir))
+        return false;
+    // SPA fallback for client-side routing
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+        filePath = path.join(staticDir, 'index.html');
+    }
+    if (!fs.existsSync(filePath))
+        return false;
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME_TYPES[ext] ?? 'application/octet-stream';
+    try {
+        const content = fs.readFileSync(filePath);
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(content);
+        return true;
+    }
+    catch {
+        return false;
+    }
+}
 // ─── Server lifecycle ─────────────────────────────────────────────────────────
 /**
  * Start the WebSocket broadcast server alongside an HTTP proxy server.
@@ -97,6 +145,9 @@ export function startBroadcaster(port) {
             const parsedUrl = new URL(req.url ?? '/', `http://${req.headers.host || 'localhost'}`);
             if (parsedUrl.pathname === '/api/klines' && req.method === 'GET') {
                 await handleKlinesProxy(parsedUrl, req, res);
+                return;
+            }
+            if (req.method === 'GET' && serveStatic(parsedUrl.pathname, res)) {
                 return;
             }
             res.writeHead(404, { 'Content-Type': 'application/json' });

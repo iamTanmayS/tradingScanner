@@ -102,12 +102,17 @@ const MIME_TYPES: Record<string, string> = {
 function serveStatic(pathname: string, res: http.ServerResponse): boolean {
   if (pathname.startsWith('/api/')) return false;
 
-  const candidates = [
-    process.env.STATIC_DIR,
+  const rawCandidates: string[] = [];
+  if (process.env.STATIC_DIR) {
+    rawCandidates.push(process.env.STATIC_DIR);
+  }
+  rawCandidates.push(
     path.resolve(process.cwd(), '../frontend/dist'),
     path.resolve(process.cwd(), 'frontend/dist'),
     path.resolve(process.cwd(), 'dist/frontend'),
-  ].filter((p): p is string => Boolean(p) && fs.existsSync(p));
+  );
+
+  const candidates = rawCandidates.filter((p) => fs.existsSync(p));
 
   const staticDir = candidates[0];
   if (!staticDir) return false;
