@@ -16,56 +16,56 @@
  */
 
 import { fetchEligibleSymbols, fetchTopSymbolsByVolume } from './universe.js';
-
 import { config } from './config.js';
 import { initCacheEntry } from './cache.js';
-import { seedIndicators } from './indicators.js';
-import { startBinanceStream } from './binanceWs.js';
-import { startBroadcaster } from './broadcaster.js';
-import { startHourlySync } from './hourlySync.js';
+import { startBroadcaster, stopBroadcaster } from './broadcaster.js';
+import { initLifecycle, startPipeline, stopPipeline } from './lifecycle.js';
 
 async function main(): Promise<void> {
   console.log('=== Crypto Scanner Backend ===');
-  console.log(`Config: port=${config.port}, seedLimit=${config.seedCoinLimit}, candles=${config.seedCandleCount}`);
+  console.log(
+    `Config: port=${config.port}, seedLimit=${config.seedCoinLimit}, candles=${config.seedCandleCount}, onDemand=${config.onDemand}, grace=${config.idleGraceSeconds}s`
+  );
 
-  // Step 1 — Fetch eligible universe
+  // Step 1 — Fetch eligible universe (uses fast pre-bundled fallback if cloud REST is blocked)
   const eligible = await fetchEligibleSymbols();
 
   // Step 2 — Rank by volume; select top N for seeding
   const topSymbols = await fetchTopSymbolsByVolume(eligible, config.seedCoinLimit);
 
-  // Step 3 — Initialise ALL eligible symbols in cache (they get live prices)
+  // Step 3 — Initialise ALL eligible symbols in cache (ready for live tickers)
   for (const symbol of eligible) {
     initCacheEntry(symbol);
   }
   console.log(`[main] Cache initialised for ${eligible.size} eligible symbols`);
 
-  // Step 4 — Start broadcast server (starts serving immediately)
+  // Step 4 — Initialize demand-driven lifecycle with top symbols
+  initLifecycle(topSymbols);
+
+  // Step 5 — Start broadcast server (HTTP & WebSocket listening on port)
   startBroadcaster();
 
-  // Step 5 — Connect to Binance live stream
-  startBinanceStream();
+  // Step 6 — Market pipeline activation
+  if (!config.onDemand) {
+    console.log('[main] ON_DEMAND=false — starting market pipeline immediately (24/7 continuous)');
+    startPipeline();
+  } else {
+    console.log(
+      `[main] ON_DEMAND=true — market pipeline will start on first frontend connection and sleep after ${config.idleGraceSeconds}s of inactivity (preserves Railway credits)`
+    );
+  }
 
-  // Step 6 — Seed indicators for top coins in background (does not block)
-  seedIndicators(topSymbols).catch((err: unknown) => {
-    console.error(`[main] Indicator seeding failed: ${String(err)}`);
-  });
-
-  // Step 7 — Start hourly candle maintenance
-  startHourlySync();
-
-  // Handle graceful shutdown
-  process.on('SIGINT', async () => {
+  // Graceful shutdown handling
+  const shutdown = async () => {
     console.log('\n[main] Shutting down…');
-    const { stopBinanceStream } = await import('./binanceWs.js');
-    const { stopBroadcaster } = await import('./broadcaster.js');
-    const { stopHourlySync } = await import('./hourlySync.js');
-    stopBinanceStream();
-    stopHourlySync();
+    stopPipeline();
     await stopBroadcaster();
     console.log('[main] Shutdown complete');
     process.exit(0);
-  });
+  };
+
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
 }
 
 main().catch((err: unknown) => {

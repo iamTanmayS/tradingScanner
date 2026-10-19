@@ -143,6 +143,46 @@ function serveStatic(pathname: string, res: http.ServerResponse): boolean {
   }
 }
 
+export type ClientLifecycleListener = (count: number, client?: WebSocket) => void;
+
+let onClientConnectCb: ClientLifecycleListener | null = null;
+let onClientDisconnectCb: ClientLifecycleListener | null = null;
+
+export function setClientLifecycleListeners(
+  onConnect: ClientLifecycleListener,
+  onDisconnect: ClientLifecycleListener,
+): void {
+  onClientConnectCb = onConnect;
+  onClientDisconnectCb = onDisconnect;
+}
+
+export function startBroadcastLoop(): void {
+  if (broadcastTimer) return;
+  broadcastTimer = setInterval(broadcastTick, BROADCAST_INTERVAL_MS);
+}
+
+export function stopBroadcastLoop(): void {
+  if (broadcastTimer) {
+    clearInterval(broadcastTimer);
+    broadcastTimer = null;
+  }
+}
+
+export function getConnectedClientCount(): number {
+  return wss?.clients.size ?? 0;
+}
+
+export function sendSnapshotToClient(client: WebSocket): void {
+  if (client.readyState !== WebSocket.OPEN) return;
+  if (!hasValidData()) return;
+  const payload = buildSnapshot();
+  try {
+    client.send(JSON.stringify(payload));
+  } catch (err) {
+    console.warn(`[broadcaster] immediate send error: ${String(err)}`);
+  }
+}
+
 // ─── Server lifecycle ─────────────────────────────────────────────────────────
 
 /**
@@ -189,11 +229,19 @@ export function startBroadcaster(port?: number): WebSocketServer {
 
   wss.on('connection', (client, req) => {
     const ip = req.socket.remoteAddress ?? 'unknown';
-    console.log(`[broadcaster] Client connected from ${ip} (total: ${wss!.clients.size})`);
+    const total = wss!.clients.size;
+    console.log(`[broadcaster] Client connected from ${ip} (total: ${total})`);
+
+    // Ensure broadcast loop is active when clients are present
+    startBroadcastLoop();
+
+    // Notify lifecycle manager
+    onClientConnectCb?.(total, client);
 
     client.on('close', () => {
       const remaining = wss?.clients.size ?? 0;
       console.log(`[broadcaster] Client disconnected (remaining: ${remaining})`);
+      onClientDisconnectCb?.(remaining);
     });
 
     client.on('error', (err) => {
@@ -209,7 +257,11 @@ export function startBroadcaster(port?: number): WebSocketServer {
     console.log(`[broadcaster] HTTP & WebSocket server listening on port ${targetPort}`);
   });
 
-  broadcastTimer = setInterval(broadcastTick, BROADCAST_INTERVAL_MS);
+  // If running 24/7 (ON_DEMAND=false), start loop immediately
+  if (!config.onDemand) {
+    startBroadcastLoop();
+  }
+
   return wss;
 }
 
@@ -217,10 +269,7 @@ export function startBroadcaster(port?: number): WebSocketServer {
  * Stop the broadcast server and cancel the broadcast loop.
  */
 export function stopBroadcaster(): Promise<void> {
-  if (broadcastTimer) {
-    clearInterval(broadcastTimer);
-    broadcastTimer = null;
-  }
+  stopBroadcastLoop();
   return new Promise((resolve) => {
     if (!wss && !httpServer) {
       resolve();

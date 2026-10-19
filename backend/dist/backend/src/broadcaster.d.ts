@@ -10,7 +10,7 @@
  *   - Client disconnects and send errors are handled without crashing the server.
  *   - No per-client backpressure — appropriate for a local/hosted demo.
  */
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import type { MarketBroadcastPayload } from '../../shared/src/types.js';
 /**
  * Convert the current cache state into a MarketBroadcastPayload.
@@ -20,6 +20,12 @@ import type { MarketBroadcastPayload } from '../../shared/src/types.js';
  * the shared type allows them to be optional.
  */
 declare function buildSnapshot(): MarketBroadcastPayload;
+export type ClientLifecycleListener = (count: number, client?: WebSocket) => void;
+export declare function setClientLifecycleListeners(onConnect: ClientLifecycleListener, onDisconnect: ClientLifecycleListener): void;
+export declare function startBroadcastLoop(): void;
+export declare function stopBroadcastLoop(): void;
+export declare function getConnectedClientCount(): number;
+export declare function sendSnapshotToClient(client: WebSocket): void;
 /**
  * Start the WebSocket broadcast server alongside an HTTP proxy server.
  * @param port - Optional port override (default: config.port). Pass 0 for OS-assigned port.

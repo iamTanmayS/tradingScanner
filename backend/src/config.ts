@@ -16,6 +16,12 @@ function getEnvStr(key: string, defaultValue: string): string {
   return process.env[key] ?? defaultValue;
 }
 
+function getEnvBool(key: string, defaultValue: boolean): boolean {
+  const raw = process.env[key];
+  if (raw === undefined) return defaultValue;
+  return raw.toLowerCase() !== 'false' && raw !== '0';
+}
+
 export const config = {
   /** Port the backend WebSocket server listens on */
   port: getEnvInt('PORT', 4000),
@@ -41,5 +47,21 @@ export const config = {
     'BINANCE_WS_URL',
     'wss://stream.binance.com:9443/ws/!miniTicker@arr',
   ),
-} as const;
+
+  /**
+   * If true, upstream Binance WebSocket, indicator seeding, and timers
+   * only run while at least one frontend WebSocket client is connected.
+   * Shuts down automatically when all clients disconnect to allow Railway
+   * Serverless to sleep the container (saving free credits).
+   * Default: true. Set ON_DEMAND=false to run 24/7.
+   */
+  onDemand: getEnvBool('ON_DEMAND', true),
+
+  /**
+   * Grace period in seconds before stopping upstream streams after the last client disconnects.
+   * Prevents stream restarts on page refresh or temporary tab switches.
+   * Default: 60 seconds.
+   */
+  idleGraceSeconds: getEnvInt('IDLE_GRACE_SECONDS', 60),
+};
 

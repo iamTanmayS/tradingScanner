@@ -123,6 +123,39 @@ function serveStatic(pathname, res) {
         return false;
     }
 }
+let onClientConnectCb = null;
+let onClientDisconnectCb = null;
+export function setClientLifecycleListeners(onConnect, onDisconnect) {
+    onClientConnectCb = onConnect;
+    onClientDisconnectCb = onDisconnect;
+}
+export function startBroadcastLoop() {
+    if (broadcastTimer)
+        return;
+    broadcastTimer = setInterval(broadcastTick, BROADCAST_INTERVAL_MS);
+}
+export function stopBroadcastLoop() {
+    if (broadcastTimer) {
+        clearInterval(broadcastTimer);
+        broadcastTimer = null;
+    }
+}
+export function getConnectedClientCount() {
+    return wss?.clients.size ?? 0;
+}
+export function sendSnapshotToClient(client) {
+    if (client.readyState !== WebSocket.OPEN)
+        return;
+    if (!hasValidData())
+        return;
+    const payload = buildSnapshot();
+    try {
+        client.send(JSON.stringify(payload));
+    }
+    catch (err) {
+        console.warn(`[broadcaster] immediate send error: ${String(err)}`);
+    }
+}
 // ─── Server lifecycle ─────────────────────────────────────────────────────────
 /**
  * Start the WebSocket broadcast server alongside an HTTP proxy server.
@@ -162,10 +195,16 @@ export function startBroadcaster(port) {
     wss = new WebSocketServer({ server: httpServer });
     wss.on('connection', (client, req) => {
         const ip = req.socket.remoteAddress ?? 'unknown';
-        console.log(`[broadcaster] Client connected from ${ip} (total: ${wss.clients.size})`);
+        const total = wss.clients.size;
+        console.log(`[broadcaster] Client connected from ${ip} (total: ${total})`);
+        // Ensure broadcast loop is active when clients are present
+        startBroadcastLoop();
+        // Notify lifecycle manager
+        onClientConnectCb?.(total, client);
         client.on('close', () => {
             const remaining = wss?.clients.size ?? 0;
             console.log(`[broadcaster] Client disconnected (remaining: ${remaining})`);
+            onClientDisconnectCb?.(remaining);
         });
         client.on('error', (err) => {
             console.warn(`[broadcaster] Client error: ${err.message}`);
@@ -177,17 +216,17 @@ export function startBroadcaster(port) {
     httpServer.listen(targetPort, () => {
         console.log(`[broadcaster] HTTP & WebSocket server listening on port ${targetPort}`);
     });
-    broadcastTimer = setInterval(broadcastTick, BROADCAST_INTERVAL_MS);
+    // If running 24/7 (ON_DEMAND=false), start loop immediately
+    if (!config.onDemand) {
+        startBroadcastLoop();
+    }
     return wss;
 }
 /**
  * Stop the broadcast server and cancel the broadcast loop.
  */
 export function stopBroadcaster() {
-    if (broadcastTimer) {
-        clearInterval(broadcastTimer);
-        broadcastTimer = null;
-    }
+    stopBroadcastLoop();
     return new Promise((resolve) => {
         if (!wss && !httpServer) {
             resolve();
