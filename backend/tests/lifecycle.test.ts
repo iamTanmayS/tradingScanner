@@ -114,3 +114,4 @@ describe('demand-driven lifecycle manager', () => {
     expect(binanceWs.stopBinanceStream).not.toHaveBeenCalled();
   });
 });
+
